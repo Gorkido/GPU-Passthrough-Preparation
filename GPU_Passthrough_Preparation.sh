@@ -48,6 +48,12 @@ uninstall() {
     systemctl disable libvirtd
     pacman -Rns --noconfirm virt-manager qemu vde2 ebtables iptables-nft nftables dnsmasq bridge-utils ovmf
     rm -rf /etc/libvirt
+    exit 0
+}
+
+## Show usages
+usage() {
+	echo -e "Usages : $(basename $0) --install | --uninstall \n"
 }
 
 ## Main
@@ -56,6 +62,8 @@ if [[ "$1" == "--install" ]]; then
     virsh_net
     configs
     files
-elif [[ "$1" == "--uninstall" ]];
+elif [[ "$1" == "--uninstall" ]]; then
 	uninstall
+else
+	{ usage; exit 0; }
 fi
