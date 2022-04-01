@@ -1,25 +1,19 @@
-if [ $EUID -ne 0 ]
-	then
-		echo "This program must run as root to function." 
-		exit 1
-fi
-
 libvirt() {
     echo "This will install and configure libvirt, QEMU and Virt-Manager."
-    pacman -S virt-manager qemu vde2 ebtables iptables-nft nftables dnsmasq bridge-utils ovmf
+    sudo pacman -S virt-manager qemu vde2 ebtables iptables-nft nftables dnsmasq bridge-utils ovmf
     echo "Installed required packages"
-    systemctl start libvirtd
+    sudo systemctl start libvirtd
     echo "libvirtd Started"
-    systemctl enable libvirtd
+    sudo systemctl enable libvirtd
     echo "Enabled libvirtd"
-    usermod -a -G libvirt $(whoami)
+    sudo usermod -a -G libvirt $(whoami)
     echo "Added $(whoami) to kvm and libvirt groups."
-    systemctl restart libvirtd
+    sudo systemctl restart libvirtd
     echo "Restarted libvirtd"
 }
 
 virsh_net() {
-    virsh net-autostart default
+    sudo virsh net-autostart default
     echo "Enabled virtual machine default network"
 }
 
@@ -44,9 +38,9 @@ files() {
 }
 
 uninstall() {
-    systemctl stop libvirtd
-    systemctl disable libvirtd
-    pacman -Rns --noconfirm virt-manager qemu vde2 ebtables iptables-nft nftables dnsmasq bridge-utils ovmf
+    sudo systemctl stop libvirtd
+    sudo systemctl disable libvirtd
+    sudo pacman -Rns --noconfirm virt-manager qemu vde2 ebtables iptables-nft nftables dnsmasq bridge-utils ovmf
     rm -rf /etc/libvirt
     exit 0
 }
