@@ -43,8 +43,19 @@ files() {
     cp -r $(pwd)/hooks/ /etc/libvirt/
 }
 
+uninstall() {
+    systemctl stop libvirtd
+    systemctl disable libvirtd
+    pacman -Rns --noconfirm virt-manager qemu vde2 ebtables iptables-nft nftables dnsmasq bridge-utils ovmf
+    rm -rf /etc/libvirt
+}
+
 ## Main
-libvirt
-virsh_net
-configs
-files
+if [[ "$1" == "--install" ]]; then
+	libvirt
+    virsh_net
+    configs
+    files
+elif [[ "$1" == "--uninstall" ]];
+	uninstall
+fi
