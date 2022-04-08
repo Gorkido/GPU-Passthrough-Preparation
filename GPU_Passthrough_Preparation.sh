@@ -23,14 +23,25 @@ virsh_net() {
     sleep 2
 }
 
+list=('unix_sock_rw_perms = "0770"' 'unix_sock_group = "libvirt"')
+
 configs() {
-    sed -i '/unix_sock_rw_perms = "0770"/s/^#//g' /etc/libvirt/libvirtd.conf
-    sed -i '/unix_sock_group = "libvirt"/s/^#//g' /etc/libvirt/libvirtd.conf
+    for string in "${list[@]}"; do
+    if grep -Fxq /etc/libvirt/libvirtd.conf $string then
+        sed -i '/unix_sock_rw_perms = "0770"/s/^#//g' /etc/libvirt/libvirtd.conf
+        sed -i '/unix_sock_group = "libvirt"/s/^#//g' /etc/libvirt/libvirtd.conf
+    else
+    cat >> /etc/libvirt/libvirtd.conf <<- _EOF_
+unix_sock_group = "libvirt"
+unix_sock_rw_perms = "0770"
+	_EOF_
+    fi
+    done
 
     cat >> /etc/libvirt/libvirtd.conf <<- _EOF_
     
-    log_filters="1:qemu"
-    log_outputs="1:file:/var/log/libvirt/libvirtd.log"
+log_filters="1:qemu"
+log_outputs="1:file:/var/log/libvirt/libvirtd.log"
 	_EOF_
 
     echo "libvirt has been successfully configured!"
