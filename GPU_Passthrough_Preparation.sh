@@ -47,9 +47,9 @@ files() {
 }
 
 uninstall() {
+    pacman -Rns --noconfirm virt-manager qemu vde2 dnsmasq bridge-utils
     systemctl stop libvirtd
     systemctl disable libvirtd
-    pacman -Rns --noconfirm virt-manager qemu vde2 nftables dnsmasq bridge-utils
     rm -rf /etc/libvirt
     exit 0
 }
