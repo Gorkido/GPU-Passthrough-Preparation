@@ -1,33 +1,33 @@
 libvirt() {
     echo "This will install and configure libvirt, QEMU and Virt-Manager."
-    sudo pacman -S --noconfirm virt-manager qemu vde2 ebtables iptables-nft nftables dnsmasq bridge-utils ovmf
+    pacman -S --noconfirm virt-manager qemu vde2 ebtables iptables-nft nftables dnsmasq bridge-utils ovmf
     sleep 2
     echo "Installed required packages"
-    sudo systemctl start libvirtd
+    systemctl start libvirtd
     sleep 2
     echo "libvirtd Started"
-    sudo systemctl enable libvirtd
+    systemctl enable libvirtd
     sleep 2
     echo "Enabled libvirtd"
-    sudo usermod -a -G libvirt $(whoami)
+    usermod -a -G libvirt $(whoami)
     sleep 2
     echo "Added $(whoami) to kvm and libvirt groups."
-    sudo systemctl restart libvirtd
+    systemctl restart libvirtd
     echo "Restarted libvirtd"
     sleep 2
 }
 
 virsh_net() {
-    sudo virsh net-autostart default
+    virsh net-autostart default
     echo "Enabled virtual machine default network"
     sleep 2
 }
 
 configs() {
-    sudo sed -i '/unix_sock_rw_perms = "0770"/s/^#//g' /etc/libvirt/libvirtd.conf
-	sudo sed -i '/unix_sock_group = "libvirt"/s/^#//g' /etc/libvirt/libvirtd.conf
+    sed -i '/unix_sock_rw_perms = "0770"/s/^#//g' /etc/libvirt/libvirtd.conf
+    sed -i '/unix_sock_group = "libvirt"/s/^#//g' /etc/libvirt/libvirtd.conf
 
-    sudo cat >> /etc/libvirt/libvirtd.conf <<- _EOF_
+    cat >> /etc/libvirt/libvirtd.conf <<- _EOF_
     
     log_filters="1:qemu"
     log_outputs="1:file:/var/log/libvirt/libvirtd.log"
@@ -35,22 +35,22 @@ configs() {
 
     echo "libvirt has been successfully configured!"
     
-    sudo sed -i '/user = "root"/s/^#//g' /etc/libvirt/qemu.conf
-    sudo sed -i 's/#group = "root"/group = "wheel"/' /etc/libvirt/qemu.conf
+    sed -i '/user = "root"/s/^#//g' /etc/libvirt/qemu.conf
+    sed -i 's/#group = "root"/group = "wheel"/' /etc/libvirt/qemu.conf
 
     echo "QEMU has been successfully configured!"
     sleep 2
 }
 
 files() {
-    sudo cp -r $(pwd)/hooks/ /etc/libvirt/
+    cp -r $(pwd)/hooks/ /etc/libvirt/
 }
 
 uninstall() {
-    sudo systemctl stop libvirtd
-    sudo systemctl disable libvirtd
-    sudo pacman -Rns --noconfirm virt-manager qemu vde2 iptables-nft nftables dnsmasq bridge-utils
-    sudo rm -rf /etc/libvirt
+    systemctl stop libvirtd
+    systemctl disable libvirtd
+    pacman -Rns --noconfirm virt-manager qemu vde2 iptables-nft nftables dnsmasq bridge-utils
+    rm -rf /etc/libvirt
     exit 0
 }
 
