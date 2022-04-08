@@ -1,6 +1,6 @@
 libvirt() {
     echo "This will install and configure libvirt, QEMU and Virt-Manager."
-    sudo pacman -S virt-manager qemu vde2 ebtables iptables-nft nftables dnsmasq bridge-utils ovmf
+    sudo pacman -S --noconfirm virt-manager qemu vde2 ebtables iptables-nft nftables dnsmasq bridge-utils ovmf
     sleep 2
     echo "Installed required packages"
     sudo systemctl start libvirtd
