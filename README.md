@@ -1,5 +1,5 @@
 # GPU-Passthrough-Preparation
-Preparation Setup for GPU Passthrough.
+Preparation script for GPU Passthrough.
 
 ## Installation
 ```
