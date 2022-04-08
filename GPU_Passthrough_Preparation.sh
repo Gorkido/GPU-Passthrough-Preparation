@@ -29,15 +29,18 @@ list=(unix_sock_rw_perms unix_sock_group)
 
 configs() {
     for string in "${list[@]}"; do
-    if grep -Fxq /etc/libvirt/libvirtd.conf $string; then
-        sed -i '/unix_sock_rw_perms = "0770"/s/^#//g' /etc/libvirt/libvirtd.conf
-        sed -i '/unix_sock_group = "libvirt"/s/^#//g' /etc/libvirt/libvirtd.conf
-    else
-    cat >> /etc/libvirt/libvirtd.conf <<- _EOF_
+        if grep -Fxq $string /etc/libvirt/libvirtd.conf; then
+            echo "Uncommented required lines from '/etc/libvirt/libvirtd.conf'"
+            sed -i '/unix_sock_rw_perms = "0770"/s/^#//g' /etc/libvirt/libvirtd.conf
+            sed -i '/unix_sock_group = "libvirt"/s/^#//g' /etc/libvirt/libvirtd.conf
+        else
+        echo "Added required lines to '/etc/libvirt/libvirtd.conf'"
+        cat >> /etc/libvirt/libvirtd.conf <<- _EOF_
+    
 unix_sock_group = "libvirt"
 unix_sock_rw_perms = "0770"
-	_EOF_
-    fi
+_EOF_
+        fi
     done
 
     cat >> /etc/libvirt/libvirtd.conf <<- _EOF_
