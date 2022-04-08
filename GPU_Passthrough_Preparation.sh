@@ -24,18 +24,20 @@ virsh_net() {
 }
 
 configs() {
-	sudo cat >> /etc/libvirt/libvirtd.conf <<- _EOF_
-    unix_sock_group = "libvirt"
-    unix_sock_rw_perms = "0770"
+    sudo sed -i '/unix_sock_rw_perms = "0770"/s/^#//g' /etc/libvirt/libvirtd.conf
+	sudo sed -i '/unix_sock_group = "libvirt"/s/^#//g' /etc/libvirt/libvirtd.conf
+
+    sudo cat >> /etc/libvirt/libvirtd.conf <<- _EOF_
+    
     log_filters="1:qemu"
     log_outputs="1:file:/var/log/libvirt/libvirtd.log"
 	_EOF_
-    echo "libvirt has been successfully configured!"
 
-	sudo cat >> /etc/libvirt/qemu.conf <<- _EOF_
-    user="root"
-    group="wheel"
-	_EOF_
+    echo "libvirt has been successfully configured!"
+    
+    sudo sed -i '/user = "root"/s/^#//g' /etc/libvirt/qemu.conf
+    sudo sed -i 's/#group = "root"/group = "wheel"/' /etc/libvirt/qemu.conf
+
     echo "QEMU has been successfully configured!"
     sleep 2
 }
