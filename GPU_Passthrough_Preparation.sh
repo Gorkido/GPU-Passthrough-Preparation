@@ -47,6 +47,33 @@ log_outputs="1:file:/var/log/libvirt/libvirtd.log"
 
 files() {
     cp -r $(pwd)/hooks/ /etc/libvirt/
+
+    echo -e "
+    Placing the ROM:
+    FEDORA (like other systems with selinux)
+
+    sudo mkdir /var/lib/libvirt/vbios
+    place the rom in above directory with
+    cd /var/lib/libvirt/vbios
+    sudo chmod -R 660 <ROMFILE>rom
+    sudo chown username:username <ROMFILE>.rom
+    sudo semanage fcontext -a -t virt_image_t /var/lib/libvirt/vbios/<ROMFILE>.rom
+    sudo restorecon -v /var/lib/libvirt/vbios/<ROMFILE>.rom
+
+    GENERAL (like other systems with apparmor)
+
+    sudo mkdir /usr/share/vgabios
+    place the rom in above directory with
+    cd /usr/share/vgabios
+    sudo chmod -R 660 <ROMFILE>.rom
+    sudo chown username:username <ROMFILE>.rom
+
+    OpenSuse
+    optional: sudo groupadd your username
+    The result has to be like:
+    ls -tlr total 256 -rw-rw---- 1 username username 260096 15 nov 00:43 <romfile>.rom
+    
+    Source: https://gitlab.com/risingprismtv/single-gpu-passthrough/-/wikis/6)-Preparation-and-placing-of-ROM-file"
 }
 
 uninstall() {
