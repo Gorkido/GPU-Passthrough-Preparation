@@ -52,8 +52,8 @@ log_outputs="1:file:/var/log/libvirt/libvirtd.log"
     
     echo "libvirt has been successfully configured!"
     
-    sed -i "/user = \"root\/c\user = \"$username\"" /etc/libvirt/qemu.conf
-    sed -i "/#group = \"root\"=/c\group = \"$username\"" /etc/libvirt/qemu.conf
+    sed -i "/#user = /c\user = \"$username\"" /etc/libvirt/qemu.conf
+    sed -i "/#group = /c\group = \"$username\"" /etc/libvirt/qemu.conf
     echo "QEMU has been successfully configured!"
     sleep 2
     wget -O $HOME/Documents/iommu_viewer.sh https://raw.githubusercontent.com/Gorkido/IOMMU-viewer/master/iommu_viewer.sh
