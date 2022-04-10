@@ -2,6 +2,12 @@
 
 username=$(whoami)
 
+if [[ $(id -u) != 0 ]]; then
+   echo "This script requires root permissions"
+   sudo "$0" "$@"
+   exit
+fi
+
 libvirt() {
     echo "This will install and configure libvirt, QEMU and Virt-Manager."
     pacman -S --noconfirm virt-manager qemu vde2 ebtables iptables-nft nftables dnsmasq bridge-utils ovmf wget
