@@ -1,6 +1,6 @@
 #!/bin/sh
 
-username=$(whoami)
+username=$(echo "$USER")
 
 if [[ $(id -u) != 0 ]]; then
    echo "This script requires root permissions"
