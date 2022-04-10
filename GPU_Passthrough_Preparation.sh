@@ -1,19 +1,21 @@
 #!/bin/sh
 
+username=$(whoami)
+
 libvirt() {
     echo "This will install and configure libvirt, QEMU and Virt-Manager."
     pacman -S --noconfirm virt-manager qemu vde2 ebtables iptables-nft nftables dnsmasq bridge-utils ovmf wget
     sleep 2
     echo "Installed required packages"
+    usermod -a -G libvirt $username
+    echo "Added $username to kvm and libvirt groups."
+    sleep 2
     systemctl start libvirtd
     sleep 2
     echo "libvirtd Started"
     systemctl enable libvirtd
     sleep 2
     echo "Enabled libvirtd"
-    usermod -a -G libvirt $(whoami)
-    sleep 2
-    echo "Added $(whoami) to kvm and libvirt groups."
     systemctl restart libvirtd
     echo "Restarted libvirtd"
     sleep 2
@@ -26,6 +28,11 @@ virsh_net() {
 }
 
 configs() {
+    cp -r $(pwd)/hooks/ /etc/libvirt/
+    sleep 1
+    chmod +x /etc/libvirt/hooks/qemu
+    chmod +x /etc/libvirt/hooks/qemu.d/win10/prepare/begin/start.sh
+    chmod +x /etc/libvirt/hooks/qemu.d/win10/release/end/revert.sh
     echo "Uncommented required lines from '/etc/libvirt/libvirtd.conf'"
     sed -i '/unix_sock_rw_perms = "0770"/s/^#//g' /etc/libvirt/libvirtd.conf
     sed -i '/unix_sock_group = "libvirt"/s/^#//g' /etc/libvirt/libvirtd.conf
@@ -35,21 +42,19 @@ configs() {
 log_filters="1:qemu"
 log_outputs="1:file:/var/log/libvirt/libvirtd.log"
 	_EOF_
-
+    
     echo "libvirt has been successfully configured!"
     
-    sed -i '/user = "root"/s/^#//g' /etc/libvirt/qemu.conf
-    sed -i  's/#group = "root"/group = "wheel"/' /etc/libvirt/qemu.conf
-
+    sed -i "s/^user = \"root\".*$/user = \"$username\"/" /etc/libvirt/qemu.conf
+    sed -i "s/^#group = \"root\".*$/group = \"$username\"/" /etc/libvirt/qemu.conf
     echo "QEMU has been successfully configured!"
     sleep 2
-    cp -r $(pwd)/hooks/ /etc/libvirt/
     wget -O $HOME/Documents/iommu_viewer.sh https://raw.githubusercontent.com/Gorkido/IOMMU-viewer/master/iommu_viewer.sh
     sh $HOME/Documents/iommu_viewer.sh
-    echo "Find your Video Card's PCI number from above, then type it(Start writing the numbers after 0000: For example: 29:00.0):"
+    echo "Find your Video Card's PCI number from above, then type it(Start writing the numbers after 0000: For example: 29_00_0):"
     read GraphicsD
     sed -i  's/VIRSH_GPU_VIDEO=pci_0000_/VIRSH_GPU_VIDEO=pci_0000_$GraphicsD/'  /etc/libvirt/hooks/kvm.conf
-    echo "Find your Audio Card's PCI number from above, then type it(Start writing the number after 0000: For example: 29:00.1)"
+    echo "Find your Audio Card's PCI number from above, then type it(Start writing the number after 0000: For example: 29_00_1)"
     read AudioD
     sed -i  's/VIRSH_GPU_AUDIO=pci_0000_/VIRSH_GPU_AUDIO=pci_0000_$AudioD/'  /etc/libvirt/hooks/kvm.conf
     systemctl restart libvirtd
