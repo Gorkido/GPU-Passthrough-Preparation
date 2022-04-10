@@ -2,7 +2,7 @@
 
 libvirt() {
     echo "This will install and configure libvirt, QEMU and Virt-Manager."
-    pacman -S --noconfirm virt-manager qemu vde2 ebtables iptables-nft nftables dnsmasq bridge-utils ovmf
+    pacman -S --noconfirm virt-manager qemu vde2 ebtables iptables-nft nftables dnsmasq bridge-utils ovmf wget
     sleep 2
     echo "Installed required packages"
     systemctl start libvirtd
@@ -39,15 +39,21 @@ log_outputs="1:file:/var/log/libvirt/libvirtd.log"
     echo "libvirt has been successfully configured!"
     
     sed -i '/user = "root"/s/^#//g' /etc/libvirt/qemu.conf
-    sed -i 's/#group = "root"/group = "wheel"/' /etc/libvirt/qemu.conf
+    sed -i  's/#group = "root"/group = "wheel"/' /etc/libvirt/qemu.conf
 
     echo "QEMU has been successfully configured!"
     sleep 2
-}
-
-files() {
     cp -r $(pwd)/hooks/ /etc/libvirt/
-
+    wget -O $HOME/Documents/iommu_viewer.sh https://raw.githubusercontent.com/Gorkido/IOMMU-viewer/master/iommu_viewer.sh
+    sh $HOME/Documents/iommu_viewer.sh
+    echo "Find your Video Card's PCI number from above, then type it(Start writing the numbers after 0000: For example: 29:00.0):"
+    read GraphicsD
+    sed -i  's/VIRSH_GPU_VIDEO=pci_0000_/VIRSH_GPU_VIDEO=pci_0000_$GraphicsD/'  /etc/libvirt/hooks/kvm.conf
+    echo "Find your Audio Card's PCI number from above, then type it(Start writing the number after 0000: For example: 29:00.1)"
+    read AudioD
+    sed -i  's/VIRSH_GPU_AUDIO=pci_0000_/VIRSH_GPU_AUDIO=pci_0000_$AudioD/'  /etc/libvirt/hooks/kvm.conf
+    systemctl restart libvirtd
+    echo "Restarted libvirtd"   
     echo -e "
     Placing the ROM:
     FEDORA (like other systems with selinux)
@@ -94,7 +100,6 @@ if [[ "$1" == "--install" ]]; then
 	libvirt
     virsh_net
     configs
-    files
 elif [[ "$1" == "--uninstall" ]]; then
 	uninstall
 else
